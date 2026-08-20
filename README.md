@@ -1,81 +1,98 @@
-# claude-skills-setup
+# fv-skills
 
-One command to get the same Claude Code skills onto any machine.
+A Claude Code plugin marketplace holding every skill this account uses, plus a bootstrap
+script for the things a marketplace cannot install.
 
 ## Why this exists
 
 `~/.claude/skills/` is a **local folder**. It is not tied to your Claude account and it does
-not sync. Signing into Claude on a second device authenticates you — it copies no skill files.
-Every machine has to install them, so this repo makes that a single command.
+not sync. Signing into Claude on a second device authenticates you — it copies no skill
+files. Publishing the skills as a marketplace makes them one command away on any machine,
+and makes them visible in `/plugin` where Claude manages their updates and removal.
 
 ## Use it on a new machine
 
-**Windows**
+```bash
+claude plugin marketplace add futurevisioncomputers/claude-skills-setup
+claude plugin install video-use@fv-skills
+claude plugin install design-dna@fv-skills
+claude plugin install gsap-skills@fv-skills
+claude plugin install superseo@fv-skills
+```
+
+The repo is private, so the machine needs GitHub access — `gh auth login` once, or any
+working git credential helper.
+
+Then, for the system-level pieces no marketplace can deliver (ffmpeg, API keys):
 
 ```powershell
-git clone https://github.com/<you>/claude-skills-setup "$HOME\Projects\claude-skills-setup"
+git clone https://github.com/futurevisioncomputers/claude-skills-setup "$HOME\Projects\claude-skills-setup"
 powershell -ExecutionPolicy Bypass -File "$HOME\Projects\claude-skills-setup\install.ps1"
 ```
 
-**macOS / Linux**
-
 ```bash
-git clone https://github.com/<you>/claude-skills-setup ~/Developer/claude-skills-setup
+git clone https://github.com/futurevisioncomputers/claude-skills-setup ~/Developer/claude-skills-setup
 bash ~/Developer/claude-skills-setup/install.sh
 ```
 
-Restart Claude Code afterwards so it rescans the skills directory.
+The installer performs the marketplace adds too, so on a fresh machine you can skip straight
+to it. Restart Claude Code afterwards.
 
-## What the installer does
+## What's in the marketplace
 
-For every entry in `skills.json`:
+| Plugin | Skills | Delivery | Needs |
+|--------|--------|----------|-------|
+| `video-use` | `video-use`, `manim-video` | vendored wrapper | ffmpeg, `ELEVENLABS_API_KEY` |
+| `design-dna` | `design-dna` | vendored wrapper | — |
+| `gsap-skills` | 8 GSAP skills | referenced upstream | — |
+| `superseo` | 11 SEO skills | referenced upstream | — |
 
-1. Clones the skill repo (or `git pull --ff-only` if already present) into `~/Projects` on
-   Windows, `~/Developer` on macOS/Linux.
-2. Installs Python deps when the entry sets `pip: true`.
-3. Links it into `~/.claude/skills/` — a **junction** on Windows (symlinks there need admin
-   or Developer Mode; junctions don't), a symlink elsewhere.
-4. Verifies by reading `SKILL.md` *through* the link. Checking that the link exists is not
-   enough — a junction pointing at a missing target still passes an existence check.
-5. Adds each `marketplaces` entry and installs its plugins through the `claude` CLI.
-6. Installs `ffmpeg` if some skill needs it and it isn't present.
-7. Prints any API keys still missing on this machine.
+## Vendored vs referenced
 
-Re-running is safe and is also how you update: it pulls every repo and repairs broken links.
+Claude Code's plugin loader **only discovers skills under a plugin's `skills/` directory**.
+
+- `gsap-skills` and `superseo` already use the canonical `skills/<name>/SKILL.md` layout, so
+  the marketplace points straight at their GitHub URLs. Nothing is copied and upstream stays
+  authoritative. A `plugin.json` in the source repo turns out to be optional; the layout is
+  what matters.
+- `video-use` and `design-dna` keep `SKILL.md` at their repo root. Referencing them directly
+  finds nothing — verified: doing that with `video-use` surfaced only its nested
+  `manim-video` skill and missed the real one. `plugins/*/` restages their files into the
+  expected layout. Both are MIT; each wrapper carries the upstream `LICENSE` plus a
+  `NOTICE.md` recording the source commit.
+
+Refresh the vendored copies when upstream moves:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File sync-vendored.ps1
+git status      # review, then commit
+```
 
 ## Adding a skill
 
-Append to `skills.json` and re-run the installer on each machine. Two kinds of entry exist.
+1. Check the source repo's layout. `skills/<name>/SKILL.md` present → reference it by URL.
+   `SKILL.md` at the root → it needs a wrapper under `plugins/`, added to the `$Vendored`
+   list in `sync-vendored.ps1`.
+2. Add an entry to `.claude-plugin/marketplace.json`.
+3. Add the plugin id to `skills.json` so the installer picks it up on other machines.
+4. Commit and push. Other machines get it with `claude plugin marketplace update fv-skills`
+   followed by `claude plugin install <name>@fv-skills`.
 
-### `marketplaces` — repos with a Claude Code plugin manifest
+## skills.json
 
-If the repo has `.claude-plugin/marketplace.json`, prefer this. Claude owns the install,
-updates, and uninstall; nothing is linked by hand.
+Read by the installers.
 
-| Field | Meaning |
-|-------|---------|
-| `marketplace` | `owner/repo` passed to `claude plugin marketplace add`. |
-| `plugins` | Plugin ids to install, e.g. `gsap-skills@gsap-skills`. |
-
-### `skills` — everything else
-
-| Field | Meaning |
-|-------|---------|
-| `name` | Clone directory name. For `layout: single`, also the skill name. |
-| `repo` | Git URL. |
-| `layout` | `single` = the whole repo is one skill. `multi` = every directory under `subdir` is its own skill and gets its own link. |
-| `subdir` | For `multi` only — usually `skills`. |
-| `pip` | `true` runs `uv sync`, or `pip install -e .` when `uv` is absent. |
-| `requires` | System tools to install. `ffmpeg` is currently the only one handled. |
-| `env` | Env vars the skill needs; the installer reports missing ones instead of prompting. |
-
-**Which layout?** If the repo root has a `SKILL.md`, it's `single`. If it has
-`.claude-plugin/plugin.json` and a `skills/` folder, it's `multi` — link each skill folder
-individually or none of them are discoverable.
+| Key | Meaning |
+|-----|---------|
+| `marketplaces[].marketplace` | Passed to `claude plugin marketplace add`. |
+| `marketplaces[].plugins` | Plugin ids to install. |
+| `skills[]` | Legacy clone-and-link path, kept for anything that can't be a plugin. Currently empty. |
+| `system.requires` | System tools to install. `ffmpeg` is the only one handled. |
+| `system.env` | API keys; the installer reports missing ones rather than prompting. |
 
 ## Secrets
 
-Never commit API keys. The installer only reports what's missing. Set them per machine:
+Never committed. Set them per machine:
 
 ```powershell
 setx ELEVENLABS_API_KEY "your-key"     # Windows, then restart the shell
@@ -85,18 +102,12 @@ setx ELEVENLABS_API_KEY "your-key"     # Windows, then restart the shell
 echo 'export ELEVENLABS_API_KEY="your-key"' >> ~/.zshrc   # macOS/Linux
 ```
 
-## Currently installed
-
-| Skill | Source | How | Needs |
-|-------|--------|-----|-------|
-| `video-use` | [browser-use/video-use](https://github.com/browser-use/video-use) | linked | ffmpeg, `ELEVENLABS_API_KEY` |
-| `design-dna` | [zanwei/design-dna](https://github.com/zanwei/design-dna) | linked | nothing |
-| `gsap-core`, `gsap-timeline`, `gsap-scrolltrigger`, `gsap-plugins`, `gsap-utils`, `gsap-react`, `gsap-frameworks`, `gsap-performance` | [greensock/gsap-skills](https://github.com/greensock/gsap-skills) | plugin | nothing |
-
 ## Tested on
 
-- **Windows** — `install.ps1` run end to end on Windows 11, repeatedly, including the
-  re-run/update path.
+- **Windows** — the full path was exercised end to end: marketplace added from the private
+  GitHub repo, all four plugins installed, skill inventories confirmed with
+  `claude plugin details`, and the vendored `helpers/` scripts run from the installed plugin
+  copy.
 - **macOS / Linux** — `install.sh` is syntax-checked and written for bash 3.2 (the version
-  macOS ships), but has not yet been executed on a real machine. Expect to shake out
-  something the first time you run it.
+  macOS ships), but has not been executed on a real machine. Expect to shake out something
+  the first time you run it.

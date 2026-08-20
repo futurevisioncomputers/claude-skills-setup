@@ -33,6 +33,14 @@
       "description": "Official GSAP skills: core tween API, timelines, ScrollTrigger, plugins, utilities, React, non-React frameworks, and performance. Referenced upstream, not copied.",
       "category": "design",
       "keywords": ["gsap", "animation", "scrolltrigger", "javascript", "react"]
+    },
+    {
+      "name": "superseo",
+      "source": { "source": "url", "url": "https://github.com/inhouseseo/superseo-skills.git" },
+      "version": "0.2.0",
+      "description": "11 SEO skills: page audits, content briefs, article writing with anti-AI-slop rules, E-E-A-T audits, semantic gap analysis, topic clusters, featured snippet optimization, link building, and expert interviews. Referenced upstream, not copied.",
+      "category": "seo",
+      "keywords": ["seo", "content", "eeat", "link-building", "semantic-seo", "featured-snippets"]
     }
   ]
 }
