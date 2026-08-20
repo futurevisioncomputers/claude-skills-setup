@@ -1,0 +1,38 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "fv-skills",
+  "owner": {
+    "name": "Future Vision Computers Institute",
+    "email": "futurevisioncomputersinstitute@gmail.com"
+  },
+  "metadata": {
+    "description": "Every Claude Code skill this account uses, installable on any machine with one marketplace add.",
+    "repository": "https://github.com/futurevisioncomputers/claude-skills-setup"
+  },
+  "plugins": [
+    {
+      "name": "video-use",
+      "source": "./plugins/video-use",
+      "version": "0.1.0",
+      "description": "Edit video by conversation. Transcribes with word-level timestamps and speaker diarization, cuts on speech boundaries and silence gaps, colour grades, burns subtitles, and generates overlay animations. Also bundles the manim-video animation skill. Needs ffmpeg and an ElevenLabs API key.",
+      "category": "productivity",
+      "keywords": ["video", "editing", "ffmpeg", "transcription", "subtitles", "animation"]
+    },
+    {
+      "name": "design-dna",
+      "source": "./plugins/design-dna",
+      "version": "1.0.0",
+      "description": "Extract, define, and apply design DNA across three dimensions: design system tokens, qualitative style, and visual effects (Canvas, WebGL, 3D, particles, shaders, scroll). Turns reference screenshots into a machine-readable design profile, then generates from it.",
+      "category": "design",
+      "keywords": ["design", "design-tokens", "design-system", "style-guide", "visual-effects"]
+    },
+    {
+      "name": "gsap-skills",
+      "source": { "source": "url", "url": "https://github.com/greensock/gsap-skills.git" },
+      "version": "1.0.0",
+      "description": "Official GSAP skills: core tween API, timelines, ScrollTrigger, plugins, utilities, React, non-React frameworks, and performance. Referenced upstream, not copied.",
+      "category": "design",
+      "keywords": ["gsap", "animation", "scrolltrigger", "javascript", "react"]
+    }
+  ]
+}

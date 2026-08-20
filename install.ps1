@@ -88,8 +88,6 @@ foreach ($s in $manifest.skills) {
         if (Verify-Skill $s.name) { $installed++ } else { $failed += $s.name }
     }
 
-    if ($s.requires -contains 'ffmpeg') { $needFfmpeg = $true }
-    foreach ($e in $s.env) { if (-not [Environment]::GetEnvironmentVariable($e, 'User')) { $needEnv += "$e  (needed by $($s.name))" } }
 }
 
 # Repos that ship a Claude Code marketplace manifest are installed as plugins instead of
@@ -105,6 +103,13 @@ if ($manifest.marketplaces -and (Get-Command claude -ErrorAction SilentlyContinu
     }
 } elseif ($manifest.marketplaces) {
     Warn "claude CLI not on PATH -- skipped marketplace plugins: $(($manifest.marketplaces | ForEach-Object { $_.marketplace }) -join ', ')"
+}
+
+if ($manifest.system) {
+    if ($manifest.system.requires -contains 'ffmpeg') { $needFfmpeg = $true }
+    foreach ($e in $manifest.system.env) {
+        if (-not [Environment]::GetEnvironmentVariable($e.name, 'User')) { $needEnv += "$($e.name)  -- $($e.for)" }
+    }
 }
 
 if ($needFfmpeg -and -not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {

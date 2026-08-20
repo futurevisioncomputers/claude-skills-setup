@@ -1,0 +1,6 @@
+{
+  "name": "video-use",
+  "description": "Edit video by conversation: transcribe with word-level timestamps, cut on speech boundaries, colour grade, burn subtitles, generate overlay animations. Vendored from browser-use/video-use (MIT).",
+  "version": "0.1.0",
+  "skills": "./skills/"
+}

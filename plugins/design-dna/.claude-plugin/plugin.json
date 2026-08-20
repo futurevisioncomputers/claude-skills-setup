@@ -1,0 +1,6 @@
+{
+  "name": "design-dna",
+  "description": "Extract, define, and apply design DNA across three dimensions: design tokens, qualitative style, and visual effects. Vendored from zanwei/design-dna (MIT).",
+  "version": "1.0.0",
+  "skills": "./skills/"
+}

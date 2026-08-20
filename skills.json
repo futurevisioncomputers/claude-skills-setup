@@ -1,32 +1,25 @@
 {
-  "$comment": "Everything this account's Claude Code should have on any machine. Add an entry, commit, re-run the installer anywhere.",
+  "$comment": "Everything this account's Claude Code should have on any machine. Skills are delivered as marketplace plugins; the installer only handles what a marketplace cannot: system tools and API keys.",
 
   "marketplaces": [
     {
-      "marketplace": "greensock/gsap-skills",
-      "plugins": ["gsap-skills@gsap-skills"],
-      "note": "8 GSAP skills (core, timeline, scrolltrigger, plugins, utils, react, frameworks, performance). Claude manages updates and uninstall. No deps, no key."
+      "marketplace": "futurevisioncomputers/claude-skills-setup",
+      "plugins": ["video-use@fv-skills", "design-dna@fv-skills", "gsap-skills@fv-skills"],
+      "note": "This repo. video-use and design-dna are vendored wrappers (their upstreams put SKILL.md at the repo root, which the plugin loader cannot see). gsap-skills is referenced upstream, not copied."
+    },
+    {
+      "marketplace": "inhouseseo/superseo-skills",
+      "plugins": ["superseo@superseo-skills"],
+      "note": "11 SEO skills. Ships its own marketplace, so it is added directly rather than re-listed in ours."
     }
   ],
 
-  "skills": [
-    {
-      "name": "video-use",
-      "repo": "https://github.com/browser-use/video-use",
-      "layout": "single",
-      "pip": true,
-      "requires": ["ffmpeg"],
-      "env": ["ELEVENLABS_API_KEY"],
-      "note": "Conversation-driven video editor. No marketplace manifest upstream, so it is linked directly. Needs ffmpeg + an ElevenLabs API key."
-    },
-    {
-      "name": "design-dna",
-      "repo": "https://github.com/zanwei/design-dna",
-      "layout": "single",
-      "pip": false,
-      "requires": [],
-      "env": [],
-      "note": "Extracts design tokens, qualitative style, and visual effects from reference designs. Upstream suggests 'npx skills add', which copies files; linking the clone instead means git pull updates it."
-    }
-  ]
+  "skills": [],
+
+  "system": {
+    "requires": ["ffmpeg"],
+    "env": [
+      { "name": "ELEVENLABS_API_KEY", "for": "video-use (ElevenLabs Scribe transcription)" }
+    ]
+  }
 }

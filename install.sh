@@ -84,14 +84,6 @@ while IFS=$'\t' read -r name repo layout subdir pip requires envs; do
         if verify_skill "$name"; then installed=$((installed + 1)); else failed="$failed $name"; fi
     fi
 
-    if [[ ",$requires," == *",ffmpeg,"* ]]; then need_ffmpeg=1; fi
-    if [ -n "$envs" ]; then
-        IFS=',' read -ra evs <<< "$envs"
-        for e in "${evs[@]}"; do
-            if [ -z "${!e:-}" ]; then need_env="$need_env$e  (needed by $name)
-"; fi
-        done
-    fi
 done < <(read_manifest)
 
 # Repos that ship a Claude Code marketplace manifest are installed as plugins instead of
@@ -119,6 +111,19 @@ while IFS=$'\t' read -r mkt plugins; do
     done
     ok "$mkt"
 done < <(read_marketplaces)
+
+# ffmpeg + API keys used to be derived from per-skill entries. Skills now arrive as
+# marketplace plugins, so those requirements live in the manifest's `system` block.
+if python3 -c "import json,sys; sys.exit(0 if 'ffmpeg' in json.load(open(sys.argv[1])).get('system',{}).get('requires',[]) else 1)" "$MANIFEST"; then
+    need_ffmpeg=1
+fi
+need_env="$(python3 -c "
+import json, sys, os
+sysblk = json.load(open(sys.argv[1])).get('system', {})
+for e in sysblk.get('env', []):
+    if not os.environ.get(e['name']):
+        print(e['name'] + '  -- ' + e['for'])
+" "$MANIFEST")"
 
 if [ "$need_ffmpeg" = "1" ] && ! command -v ffmpeg >/dev/null; then
     echo ""
