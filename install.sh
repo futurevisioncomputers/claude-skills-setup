@@ -53,6 +53,7 @@ need_ffmpeg=0; installed=0
 need_env=""   # newline-delimited; arrays are unsafe on bash 3.2 + set -u
 failed=""
 mkt_count=$(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1])).get('marketplaces', [])))" "$MANIFEST")
+plug_count=$(python3 -c "import json,sys; print(sum(len(m.get('plugins',[])) for m in json.load(open(sys.argv[1])).get('marketplaces', [])))" "$MANIFEST")
 
 while IFS=$'\t' read -r name repo layout subdir pip requires envs; do
     echo ""
@@ -136,7 +137,7 @@ if [ "$need_ffmpeg" = "1" ] && ! command -v ffmpeg >/dev/null; then
 fi
 
 echo ""
-echo "=== $installed linked skill(s), $mkt_count marketplace plugin(s) ==="
+echo "=== $plug_count plugin(s) from $mkt_count marketplace(s), $installed linked skill(s) ==="
 if [ -n "$failed" ]; then fail "failed:$failed"; fi
 if [ -n "$need_env" ]; then
     echo ""
@@ -147,5 +148,5 @@ if [ -n "$need_env" ]; then
     echo "  Add to ~/.zshrc or ~/.bashrc:  export VARNAME=\"value\""
 fi
 echo ""
-echo "Restart Claude Code to pick up newly linked skills."
+echo "Restart Claude Code to pick up the new plugins."
 echo ""

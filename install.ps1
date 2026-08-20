@@ -123,13 +123,14 @@ if ($needFfmpeg -and -not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
     }
 }
 
-$mktCount = @($manifest.marketplaces).Count
-Write-Host "`n=== $installed linked skill(s), $mktCount marketplace plugin(s) ===" -ForegroundColor Cyan
+$plugCount = @($manifest.marketplaces | ForEach-Object { $_.plugins }).Count
+$mktCount  = @($manifest.marketplaces).Count
+Write-Host "`n=== $plugCount plugin(s) from $mktCount marketplace(s), $installed linked skill(s) ===" -ForegroundColor Cyan
 if ($failed.Count) { Fail "failed: $($failed -join ', ')" }
 if ($needEnv.Count) {
     Write-Host "`nStill needed on this machine:" -ForegroundColor Yellow
     $needEnv | ForEach-Object { Write-Host "  - $_" }
     Write-Host '  Set with:  setx VARNAME "value"    (then restart your shell)'
 }
-Write-Host "`nRestart Claude Code to pick up newly linked skills.`n"
+Write-Host "`nRestart Claude Code to pick up the new plugins.`n"
 
