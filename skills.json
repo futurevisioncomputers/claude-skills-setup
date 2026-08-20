@@ -1,0 +1,32 @@
+{
+  "$comment": "Everything this account's Claude Code should have on any machine. Add an entry, commit, re-run the installer anywhere.",
+
+  "marketplaces": [
+    {
+      "marketplace": "greensock/gsap-skills",
+      "plugins": ["gsap-skills@gsap-skills"],
+      "note": "8 GSAP skills (core, timeline, scrolltrigger, plugins, utils, react, frameworks, performance). Claude manages updates and uninstall. No deps, no key."
+    }
+  ],
+
+  "skills": [
+    {
+      "name": "video-use",
+      "repo": "https://github.com/browser-use/video-use",
+      "layout": "single",
+      "pip": true,
+      "requires": ["ffmpeg"],
+      "env": ["ELEVENLABS_API_KEY"],
+      "note": "Conversation-driven video editor. No marketplace manifest upstream, so it is linked directly. Needs ffmpeg + an ElevenLabs API key."
+    },
+    {
+      "name": "design-dna",
+      "repo": "https://github.com/zanwei/design-dna",
+      "layout": "single",
+      "pip": false,
+      "requires": [],
+      "env": [],
+      "note": "Extracts design tokens, qualitative style, and visual effects from reference designs. Upstream suggests 'npx skills add', which copies files; linking the clone instead means git pull updates it."
+    }
+  ]
+}
